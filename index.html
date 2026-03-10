@@ -1,28 +1,3 @@
-<?php
-declare(strict_types=1);
-
-function readIntParam(string $name, int $default, int $min, int $max): int
-{
-    $value = filter_input(INPUT_GET, $name, FILTER_VALIDATE_INT);
-    if ($value === false || $value === null) {
-        return $default;
-    }
-
-    return max($min, min($max, $value));
-}
-
-$rows = readIntParam('rows', 11, 6, 18);
-$cols = readIntParam('cols', 7, 4, 12);
-
-$initialState = [];
-for ($row = 0; $row < $rows; $row++) {
-    $stateRow = [];
-    for ($col = 0; $col < $cols; $col++) {
-        $stateRow[] = 0;
-    }
-    $initialState[] = $stateRow;
-}
-?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -90,6 +65,7 @@ for ($row = 0; $row < $rows; $row++) {
       white-space: nowrap;
       border: 0;
     }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -159,14 +135,13 @@ for ($row = 0; $row < $rows; $row++) {
     }
 
     .board {
-      --cols: 10;
+      --cols: 7;
       display: grid;
       grid-template-columns: repeat(var(--cols), minmax(24px, 1fr));
       gap: 0;
       width: min(520px, 100%);
       margin-inline: auto;
-      background:
-        linear-gradient(180deg, var(--tile-2), var(--tile-1));
+      background: linear-gradient(180deg, var(--tile-2), var(--tile-1));
       border: 1px solid rgba(173, 146, 77, 0.55);
       border-radius: 16px;
       overflow: hidden;
@@ -195,8 +170,7 @@ for ($row = 0; $row < $rows; $row++) {
       inset: 0;
       border-right: 1px solid var(--tile-line);
       border-bottom: 1px solid var(--tile-line);
-      background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
       pointer-events: none;
     }
 
@@ -221,105 +195,80 @@ for ($row = 0; $row < $rows; $row++) {
     }
 
     @keyframes pulse {
-      0% {
-        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
-      }
-      70% {
-        filter: drop-shadow(0 10px 12px rgba(177, 143, 71, 0.4));
-      }
-      100% {
-        filter: drop-shadow(0 4px 7px rgba(1, 11, 9, 0.45));
-      }
+      0% { filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45)); }
+      70% { filter: drop-shadow(0 10px 12px rgba(177, 143, 71, 0.4)); }
+      100% { filter: drop-shadow(0 4px 7px rgba(1, 11, 9, 0.45)); }
     }
 
     @keyframes tile-enter {
-      from {
-        transform: translateY(16px) scale(0.8);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
+      from { transform: translateY(16px) scale(0.8); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     @media (max-width: 760px) {
-      body {
-        padding: 12px;
-      }
-
-      .game-shell {
-        padding: 14px;
-      }
-
-      .controls {
-        grid-template-columns: repeat(2, minmax(120px, 1fr));
-      }
-
-      .value {
-        font-size: 1.2rem;
-      }
+      body { padding: 12px; }
+      .game-shell { padding: 14px; }
+      .controls { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+      .value { font-size: 1.2rem; }
     }
   </style>
 </head>
 <body>
   <h1 class="sr-only">Tōltēcah, a Mayan-inspired casual browser chain reaction puzzle game</h1>
-  <p class="sr-only">
-    Play free online and rotate coins to trigger combo chains, score points, and beat your best run.
-  </p>
+  <p class="sr-only">Play free online and rotate coins to trigger combo chains, score points, and beat your best run.</p>
+
   <main class="game-shell">
     <section class="controls">
-      <div class="stat">
-        <span class="label">Score</span>
-        <span id="score" class="value">0</span>
-      </div>
-      <div class="stat">
-        <span class="label">Moves</span>
-        <span id="moves" class="value">0</span>
-      </div>
-      <div class="stat">
-        <span class="label">Last Chain</span>
-        <span id="last-chain" class="value">0</span>
-      </div>
-      <div class="stat">
-        <span class="label">Best Chain</span>
-        <span id="best-chain" class="value">0</span>
-      </div>
+      <div class="stat"><span class="label">Score</span><span id="score" class="value">0</span></div>
+      <div class="stat"><span class="label">Moves</span><span id="moves" class="value">0</span></div>
+      <div class="stat"><span class="label">Last Chain</span><span id="last-chain" class="value">0</span></div>
+      <div class="stat"><span class="label">Best Chain</span><span id="best-chain" class="value">0</span></div>
     </section>
 
-    <div id="board" class="board" style="--cols: <?php echo $cols; ?>;">
-      <?php
-      $tileIndex = 0;
-      for ($row = 0; $row < $rows; $row++):
-          for ($col = 0; $col < $cols; $col++):
-              $rotation = $initialState[$row][$col];
-              ?>
-              <button
-                type="button"
-                class="bubble"
-                data-r="<?php echo $row; ?>"
-                data-c="<?php echo $col; ?>"
-                data-rotation="<?php echo $rotation; ?>"
-                style="--rot: <?php echo $rotation; ?>; --turn: <?php echo $rotation; ?>; --i: <?php echo $tileIndex; ?>;"
-                aria-label="Bubble <?php echo ($row + 1) . '-' . ($col + 1); ?>"
-              >
-                <img class="bubble-img" src="assets/image.png" alt="" aria-hidden="true">
-              </button>
-              <?php
-              $tileIndex++;
-          endfor;
-      endfor;
-      ?>
-    </div>
-
+    <div id="board" class="board"></div>
   </main>
 
   <script>
-    const rows = <?php echo $rows; ?>;
-    const cols = <?php echo $cols; ?>;
-    const startingState = <?php echo json_encode($initialState, JSON_THROW_ON_ERROR); ?>;
+    const rows = 11;
+    const cols = 7;
+    const startingState = Array.from({ length: rows }, () => Array(cols).fill(0));
 
     const boardEl = document.getElementById("board");
+    boardEl.style.setProperty("--cols", String(cols));
+
+    function buildBoard() {
+      const frag = document.createDocumentFragment();
+      let tileIndex = 0;
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const rotation = startingState[row][col];
+          const bubble = document.createElement("button");
+          bubble.type = "button";
+          bubble.className = "bubble";
+          bubble.dataset.r = String(row);
+          bubble.dataset.c = String(col);
+          bubble.dataset.rotation = String(rotation);
+          bubble.style.setProperty("--rot", String(rotation));
+          bubble.style.setProperty("--turn", String(rotation));
+          bubble.style.setProperty("--i", String(tileIndex));
+          bubble.setAttribute("aria-label", `Bubble ${row + 1}-${col + 1}`);
+
+          const img = document.createElement("img");
+          img.className = "bubble-img";
+          img.src = "assets/image.png";
+          img.alt = "";
+          img.setAttribute("aria-hidden", "true");
+          bubble.appendChild(img);
+
+          frag.appendChild(bubble);
+          tileIndex += 1;
+        }
+      }
+      boardEl.replaceChildren(frag);
+    }
+
+    buildBoard();
+
     const scoreEl = document.getElementById("score");
     const movesEl = document.getElementById("moves");
     const lastChainEl = document.getElementById("last-chain");
@@ -347,14 +296,8 @@ for ($row = 0; $row < $rows; $row++) {
     let bestChain = 0;
     let busy = false;
 
-    function cloneState(grid) {
-      return grid.map((row) => row.slice());
-    }
-
-    function sleep(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
+    function cloneState(grid) { return grid.map((row) => row.slice()); }
+    function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
     function isReactive(rotation, side) {
       return side === ((1 + rotation) & 3) || side === ((2 + rotation) & 3);
     }
@@ -385,9 +328,7 @@ for ($row = 0; $row < $rows; $row++) {
     }
 
     async function runMove(startRow, startCol) {
-      if (busy) {
-        return;
-      }
+      if (busy) return;
 
       setBusy(true);
       moves += 1;
@@ -420,25 +361,18 @@ for ($row = 0; $row < $rows; $row++) {
         score += wave.length;
         reactions += wave.length;
         updateStatLine(chainSize);
-        await sleep(140);
+        await sleep(180);
 
         for (const cell of wave) {
           const sourceRotation = state[cell.row][cell.col];
           for (const direction of directions) {
             const nextRow = cell.row + direction.dr;
             const nextCol = cell.col + direction.dc;
-            if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) {
-              continue;
-            }
-
-            if (!isReactive(sourceRotation, direction.side)) {
-              continue;
-            }
+            if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) continue;
+            if (!isReactive(sourceRotation, direction.side)) continue;
 
             const touchingSide = oppositeSide[direction.side];
-            if (!isReactive(state[nextRow][nextCol], touchingSide)) {
-              continue;
-            }
+            if (!isReactive(state[nextRow][nextCol], touchingSide)) continue;
 
             queue.push({ row: nextRow, col: nextCol });
           }
@@ -449,25 +383,9 @@ for ($row = 0; $row < $rows; $row++) {
         console.warn("Move stopped after hitting reaction safety limit.");
       }
 
-      if (chainSize > bestChain) {
-        bestChain = chainSize;
-      }
+      if (chainSize > bestChain) bestChain = chainSize;
       updateStatLine(chainSize);
       setBusy(false);
-    }
-
-    function redrawBoard() {
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-          const bubble = cells[row][col];
-          const rotation = state[row][col];
-          const turn = turns[row][col];
-          bubble.dataset.rotation = String(rotation);
-          bubble.style.setProperty("--rot", String(rotation));
-          bubble.style.setProperty("--turn", String(turn));
-          bubble.classList.remove("pulse");
-        }
-      }
     }
 
     boardEl.querySelectorAll(".bubble").forEach((bubble) => {
