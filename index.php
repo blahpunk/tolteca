@@ -11,7 +11,7 @@ function readIntParam(string $name, int $default, int $min, int $max): int
     return max($min, min($max, $value));
 }
 
-$rows = readIntParam('rows', 10, 6, 18);
+$rows = readIntParam('rows', 11, 6, 18);
 $cols = readIntParam('cols', 7, 4, 12);
 
 $initialState = [];
@@ -366,11 +366,11 @@ for ($row = 0; $row < $rows; $row++) {
       bestChainEl.textContent = String(bestChain);
     }
 
-    function rotateCell(row, col) {
+    function rotateCell(row, col, turnsToApply = 1) {
       const bubble = cells[row][col];
-      const nextRotation = (state[row][col] + 1) & 3;
+      const nextRotation = (state[row][col] + turnsToApply) & 3;
       state[row][col] = nextRotation;
-      turns[row][col] += 1;
+      turns[row][col] += turnsToApply;
       bubble.dataset.rotation = String(nextRotation);
       bubble.style.setProperty("--rot", String(nextRotation));
       bubble.style.setProperty("--turn", String(turns[row][col]));
@@ -393,41 +393,55 @@ for ($row = 0; $row < $rows; $row++) {
       moves += 1;
 
       let chainSize = 0;
-      const queue = [{ row: startRow, col: startCol }];
+      let queue = [{ row: startRow, col: startCol }];
       let reactions = 0;
       const maxReactions = rows * cols * 64;
 
       while (queue.length > 0 && reactions < maxReactions) {
-        const cell = queue.shift();
-        if (!cell) {
-          break;
+        const wave = queue;
+        queue = [];
+        const rotationsByCell = new Map();
+
+        for (const cell of wave) {
+          const id = cell.row + ":" + cell.col;
+          const entry = rotationsByCell.get(id);
+          if (entry) {
+            entry.count += 1;
+          } else {
+            rotationsByCell.set(id, { row: cell.row, col: cell.col, count: 1 });
+          }
         }
 
-        rotateCell(cell.row, cell.col);
-        chainSize += 1;
-        score += 1;
-        reactions += 1;
+        for (const entry of rotationsByCell.values()) {
+          rotateCell(entry.row, entry.col, entry.count);
+        }
+
+        chainSize += wave.length;
+        score += wave.length;
+        reactions += wave.length;
         updateStatLine(chainSize);
         await sleep(140);
 
-        const sourceRotation = state[cell.row][cell.col];
-        for (const direction of directions) {
-          const nextRow = cell.row + direction.dr;
-          const nextCol = cell.col + direction.dc;
-          if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) {
-            continue;
-          }
+        for (const cell of wave) {
+          const sourceRotation = state[cell.row][cell.col];
+          for (const direction of directions) {
+            const nextRow = cell.row + direction.dr;
+            const nextCol = cell.col + direction.dc;
+            if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) {
+              continue;
+            }
 
-          if (!isReactive(sourceRotation, direction.side)) {
-            continue;
-          }
+            if (!isReactive(sourceRotation, direction.side)) {
+              continue;
+            }
 
-          const touchingSide = oppositeSide[direction.side];
-          if (!isReactive(state[nextRow][nextCol], touchingSide)) {
-            continue;
-          }
+            const touchingSide = oppositeSide[direction.side];
+            if (!isReactive(state[nextRow][nextCol], touchingSide)) {
+              continue;
+            }
 
-          queue.push({ row: nextRow, col: nextCol });
+            queue.push({ row: nextRow, col: nextCol });
+          }
         }
       }
 
