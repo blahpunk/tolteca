@@ -180,7 +180,7 @@
       display: block;
       transform: rotate(calc(var(--turn, 0) * 90deg));
       transform-origin: center;
-      transition: transform 170ms cubic-bezier(.16, .88, .26, 1), filter 140ms ease;
+      transition: transform 180ms cubic-bezier(.16, .88, .26, 1), filter 140ms ease;
       filter: drop-shadow(0 4px 7px rgba(1, 11, 9, 0.45));
       object-fit: contain;
       padding: 8%;
@@ -309,11 +309,11 @@
       bestChainEl.textContent = String(bestChain);
     }
 
-    function rotateCell(row, col, turnsToApply = 1) {
+    function rotateCell(row, col) {
       const bubble = cells[row][col];
-      const nextRotation = (state[row][col] + turnsToApply) & 3;
+      const nextRotation = (state[row][col] + 1) & 3;
       state[row][col] = nextRotation;
-      turns[row][col] += turnsToApply;
+      turns[row][col] += 1;
       bubble.dataset.rotation = String(nextRotation);
       bubble.style.setProperty("--rot", String(nextRotation));
       bubble.style.setProperty("--turn", String(turns[row][col]));
@@ -341,29 +341,27 @@
       while (queue.length > 0 && reactions < maxReactions) {
         const wave = queue;
         queue = [];
-        const rotationsByCell = new Map();
 
+        const uniqueWave = [];
+        const seenInWave = new Set();
         for (const cell of wave) {
           const id = cell.row + ":" + cell.col;
-          const entry = rotationsByCell.get(id);
-          if (entry) {
-            entry.count += 1;
-          } else {
-            rotationsByCell.set(id, { row: cell.row, col: cell.col, count: 1 });
-          }
+          if (seenInWave.has(id)) continue;
+          seenInWave.add(id);
+          uniqueWave.push(cell);
         }
 
-        for (const entry of rotationsByCell.values()) {
-          rotateCell(entry.row, entry.col, entry.count);
+        for (const cell of uniqueWave) {
+          rotateCell(cell.row, cell.col);
         }
-
-        chainSize += wave.length;
-        score += wave.length;
-        reactions += wave.length;
-        updateStatLine(chainSize);
         await sleep(180);
 
-        for (const cell of wave) {
+        chainSize += uniqueWave.length;
+        score += uniqueWave.length;
+        reactions += uniqueWave.length;
+        updateStatLine(chainSize);
+
+        for (const cell of uniqueWave) {
           const sourceRotation = state[cell.row][cell.col];
           for (const direction of directions) {
             const nextRow = cell.row + direction.dr;
