@@ -29,6 +29,39 @@ for ($row = 0; $row < $rows; $row++) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tōltēcah</title>
+  <meta name="description" content="Play Tōltēcah, a free casual browser puzzle game where rotating jade coins trigger chain reactions. Fast rounds, satisfying combos, and Mayan-inspired temple vibes.">
+  <meta name="keywords" content="casual browser game, chain reaction game, puzzle game online, free web game, strategy puzzle, mayan game, jade temple game, rotator puzzle">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <link rel="canonical" href="https://blahpunk.com/tolteca/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tōltēcah | Casual Browser Chain Reaction Game">
+  <meta property="og:description" content="Rotate coins, trigger combos, and chase high chains in this free Mayan-inspired casual browser puzzle game.">
+  <meta property="og:url" content="https://blahpunk.com/tolteca/">
+  <meta property="og:image" content="https://blahpunk.com/tolteca/assets/image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tōltēcah | Casual Browser Chain Reaction Game">
+  <meta name="twitter:description" content="A free, fast, chain-reaction puzzle for browser players with a dark jade temple aesthetic.">
+  <meta name="twitter:image" content="https://blahpunk.com/tolteca/assets/image.png">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "Tōltēcah",
+      "url": "https://blahpunk.com/tolteca/",
+      "image": "https://blahpunk.com/tolteca/assets/image.png",
+      "description": "Tōltēcah is a free casual browser puzzle game where rotating jade coins trigger chain reactions in a Mayan-inspired temple setting.",
+      "genre": ["Puzzle", "Casual", "Strategy"],
+      "playMode": "SinglePlayer",
+      "applicationCategory": "Game",
+      "operatingSystem": "Any",
+      "inLanguage": "en",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  </script>
   <style>
     :root {
       --ink: #cbdbc8;
@@ -46,6 +79,17 @@ for ($row = 0; $row < $rows; $row++) {
       box-sizing: border-box;
     }
 
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     body {
       margin: 0;
       min-height: 100vh;
@@ -219,6 +263,10 @@ for ($row = 0; $row < $rows; $row++) {
   </style>
 </head>
 <body>
+  <h1 class="sr-only">Tōltēcah, a Mayan-inspired casual browser chain reaction puzzle game</h1>
+  <p class="sr-only">
+    Play free online and rotate coins to trigger combo chains, score points, and beat your best run.
+  </p>
   <main class="game-shell">
     <section class="controls">
       <div class="stat">
